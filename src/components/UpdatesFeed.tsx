@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { UpdateItem, FilterState } from '@/lib/types';
-import { sortUpdates, getAllTags, getAllAuthors } from '@/lib/classifier';
+import { sortUpdates, getAllTags, getAllAuthors, getAllDates } from '@/lib/classifier';
 import FilterBar from './FilterBar';
 import UpdateCard from './UpdateCard';
 import DetailPanel from './DetailPanel';
@@ -22,10 +22,13 @@ export default function UpdatesFeed({ updates }: UpdatesFeedProps) {
     authors: [],
     onlyMentions: false,
     searchQuery: '',
+    dateFrom: null,
+    dateTo: null,
   });
 
   const availableTags = useMemo(() => getAllTags(updates), [updates]);
   const availableAuthors = useMemo(() => getAllAuthors(updates), [updates]);
+  const availableDates = useMemo(() => getAllDates(updates), [updates]);
 
   // Apply filters
   const filteredUpdates = useMemo(() => {
@@ -72,6 +75,14 @@ export default function UpdatesFeed({ updates }: UpdatesFeedProps) {
         u.summary.toLowerCase().includes(query) ||
         u.details.toLowerCase().includes(query)
       );
+    }
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      result = result.filter(u => u.date && u.date >= filters.dateFrom!);
+    }
+    if (filters.dateTo) {
+      result = result.filter(u => u.date && u.date <= filters.dateTo!);
     }
 
     return sortUpdates(result);
@@ -137,6 +148,7 @@ export default function UpdatesFeed({ updates }: UpdatesFeedProps) {
               onFiltersChange={setFilters}
               availableTags={availableTags}
               availableAuthors={availableAuthors}
+              availableDates={availableDates}
             />
           </div>
         )}

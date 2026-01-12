@@ -1,13 +1,14 @@
 'use client';
 
 import { UpdateCategory, Priority, FilterState } from '@/lib/types';
-import { Search, X } from 'lucide-react';
+import { Search, X, Calendar } from 'lucide-react';
 
 interface FilterBarProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   availableTags: string[];
   availableAuthors: string[];
+  availableDates: string[];
 }
 
 const CATEGORIES: UpdateCategory[] = [
@@ -43,6 +44,7 @@ export default function FilterBar({
   onFiltersChange,
   availableTags,
   availableAuthors,
+  availableDates,
 }: FilterBarProps) {
   const toggleCategory = (category: UpdateCategory) => {
     const newCategories = filters.categories.includes(category)
@@ -80,6 +82,8 @@ export default function FilterBar({
       authors: [],
       onlyMentions: false,
       searchQuery: '',
+      dateFrom: null,
+      dateTo: null,
     });
   };
 
@@ -89,7 +93,15 @@ export default function FilterBar({
     filters.tags.length > 0 ||
     filters.authors.length > 0 ||
     filters.onlyMentions ||
-    filters.searchQuery.length > 0;
+    filters.searchQuery.length > 0 ||
+    filters.dateFrom !== null ||
+    filters.dateTo !== null;
+  
+  // Format date for display
+  const formatDateDisplay = (dateStr: string): string => {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
 
   return (
     <div className="space-y-4 p-4 bg-white border border-surface-200 rounded-lg">
@@ -158,6 +170,64 @@ export default function FilterBar({
           />
           <span className="text-sm text-surface-700">Only @channel/@here mentions</span>
         </label>
+      </div>
+
+      {/* Date Filter */}
+      <div>
+        <div className="text-xs font-medium text-surface-500 mb-2 flex items-center gap-1">
+          <Calendar className="w-3.5 h-3.5" />
+          Date Range
+        </div>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="text-xs text-surface-400 block mb-1">From</label>
+              <input
+                type="date"
+                value={filters.dateFrom || ''}
+                onChange={(e) => onFiltersChange({ ...filters, dateFrom: e.target.value || null })}
+                className="w-full px-2 py-1.5 text-xs border border-surface-200 rounded
+                         focus:outline-none focus:ring-1 focus:ring-primary-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-surface-400 block mb-1">To</label>
+              <input
+                type="date"
+                value={filters.dateTo || ''}
+                onChange={(e) => onFiltersChange({ ...filters, dateTo: e.target.value || null })}
+                className="w-full px-2 py-1.5 text-xs border border-surface-200 rounded
+                         focus:outline-none focus:ring-1 focus:ring-primary-500"
+              />
+            </div>
+          </div>
+          {/* Quick date buttons */}
+          {availableDates.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {availableDates.slice(0, 5).map((date) => (
+                <button
+                  key={date}
+                  onClick={() => onFiltersChange({ ...filters, dateFrom: date, dateTo: date })}
+                  className={`px-2 py-0.5 text-xs rounded border transition-all
+                    ${filters.dateFrom === date && filters.dateTo === date
+                      ? 'bg-primary-100 text-primary-800 border-primary-200'
+                      : 'bg-white text-surface-600 border-surface-200 hover:bg-surface-50'
+                    }`}
+                >
+                  {formatDateDisplay(date)}
+                </button>
+              ))}
+            </div>
+          )}
+          {(filters.dateFrom || filters.dateTo) && (
+            <button
+              onClick={() => onFiltersChange({ ...filters, dateFrom: null, dateTo: null })}
+              className="text-xs text-surface-500 hover:text-surface-700"
+            >
+              Clear dates
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tags Filter (if any) */}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Clipboard, Trash2, Upload, Download } from 'lucide-react';
+import { Clipboard, Trash2, Upload, Download, Calendar } from 'lucide-react';
 
 interface PasteInputProps {
   value: string;
@@ -11,6 +11,8 @@ interface PasteInputProps {
   onImport: (json: string) => void;
   onExport: () => void;
   hasData: boolean;
+  selectedDate: string;
+  onDateChange: (date: string) => void;
 }
 
 export default function PasteInput({
@@ -21,6 +23,8 @@ export default function PasteInput({
   onImport,
   onExport,
   hasData,
+  selectedDate,
+  onDateChange,
 }: PasteInputProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,6 +113,24 @@ export default function PasteInput({
             className="hidden"
           />
         </div>
+      </div>
+
+      {/* Date Picker */}
+      <div className="mb-3 p-3 bg-surface-50 rounded-lg border border-surface-200">
+        <label className="flex items-center gap-2 text-sm font-medium text-surface-700 mb-2">
+          <Calendar className="w-4 h-4" />
+          Date of Messages
+        </label>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => onDateChange(e.target.value)}
+          className="w-full px-3 py-2 text-sm border border-surface-200 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+        />
+        <p className="text-xs text-surface-500 mt-1">
+          Assign a date to these messages for filtering
+        </p>
       </div>
 
       {/* Textarea */}

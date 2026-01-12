@@ -34,6 +34,9 @@ export default function Home() {
   const [updates, setUpdates] = useState<UpdateItem[]>([]);
   const [activeTab, setActiveTab] = useState<TabId>('feed');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split('T')[0]
+  );
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -58,15 +61,19 @@ export default function Home() {
 
   const handleParse = useCallback(() => {
     const parsedMessages = parseSlackText(rawText);
-    const classifiedUpdates = classifyMessages(parsedMessages);
+    const classifiedUpdates = classifyMessages(parsedMessages, selectedDate);
     setMessages(parsedMessages);
-    setUpdates(classifiedUpdates);
+    setUpdates(prev => {
+      // Merge with existing updates (keep updates from other dates)
+      const existingFromOtherDates = prev.filter(u => u.date !== selectedDate);
+      return [...existingFromOtherDates, ...classifiedUpdates];
+    });
     
     // Switch to feed tab after parsing
     if (classifiedUpdates.length > 0) {
       setActiveTab('feed');
     }
-  }, [rawText]);
+  }, [rawText, selectedDate]);
 
   const handleClear = useCallback(() => {
     setRawText('');
@@ -134,6 +141,8 @@ export default function Home() {
                 onImport={handleImport}
                 onExport={handleExport}
                 hasData={messages.length > 0}
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
               />
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { UpdateItem, UpdateCategory, Priority } from '@/lib/types';
-import { Pin, ExternalLink, Clock, User } from 'lucide-react';
+import { Pin, ExternalLink, Clock, User, Calendar } from 'lucide-react';
 
 interface UpdateCardProps {
   update: UpdateItem;
@@ -93,6 +93,12 @@ export default function UpdateCard({ update, onClick }: UpdateCardProps) {
             <span className="flex items-center gap-1">
               <User className="w-3 h-3" />
               {update.owner}
+            </span>
+          )}
+          {update.date && (
+            <span className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              {new Date(update.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           )}
           {update.timestamp_text && (

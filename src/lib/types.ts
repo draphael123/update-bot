@@ -41,6 +41,7 @@ export interface UpdateItem {
   timestamp_text: string | null;
   timestamp_minutes: number | null;
   is_pinned: boolean;
+  date: string | null; // YYYY-MM-DD format
 }
 
 // Filter state for the updates feed
@@ -51,6 +52,8 @@ export interface FilterState {
   authors: string[];
   onlyMentions: boolean;
   searchQuery: string;
+  dateFrom: string | null; // YYYY-MM-DD
+  dateTo: string | null;   // YYYY-MM-DD
 }
 
 // Document template types

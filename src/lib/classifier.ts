@@ -281,7 +281,7 @@ function classifyPriority(message: SlackMessage, category: UpdateCategory): Prio
 /**
  * Classify a single SlackMessage into an UpdateItem
  */
-export function classifyMessage(message: SlackMessage): UpdateItem {
+export function classifyMessage(message: SlackMessage, date?: string | null): UpdateItem {
   const category = classifyCategory(message);
   const priority = classifyPriority(message, category);
   const tags = extractTags(message.body);
@@ -303,14 +303,15 @@ export function classifyMessage(message: SlackMessage): UpdateItem {
     timestamp_text: message.timestamp_text,
     timestamp_minutes: message.timestamp_minutes,
     is_pinned: message.is_pinned_context,
+    date: date || null,
   };
 }
 
 /**
  * Classify all messages into UpdateItems
  */
-export function classifyMessages(messages: SlackMessage[]): UpdateItem[] {
-  return messages.map(classifyMessage);
+export function classifyMessages(messages: SlackMessage[], date?: string | null): UpdateItem[] {
+  return messages.map(msg => classifyMessage(msg, date));
 }
 
 /**
@@ -359,5 +360,18 @@ export function getAllAuthors(updates: UpdateItem[]): string[] {
     }
   }
   return Array.from(authorSet).sort();
+}
+
+/**
+ * Get all unique dates from updates
+ */
+export function getAllDates(updates: UpdateItem[]): string[] {
+  const dateSet = new Set<string>();
+  for (const update of updates) {
+    if (update.date) {
+      dateSet.add(update.date);
+    }
+  }
+  return Array.from(dateSet).sort().reverse(); // Most recent first
 }
 
